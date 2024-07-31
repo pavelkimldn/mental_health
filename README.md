@@ -39,5 +39,3 @@ From the correlation heatmap, the strongest correlations with seeking mental hea
 
 This project demonstrates the use of decision tree classifiers to predict mental health treatment-seeking behavior based on work environment factors. Key findings include the significant impact of the work environment, particularly in tech companies, and the perceived consequences of discussing health issues on seeking mental health treatment. The model's performance, as evidenced by the confusion matrix, ROC curve, and cross-validation scores, indicates that it can be a useful tool for predicting mental health treatment-seeking behavior.
 
-
-![github](https://github.com/pavelkimldn/Computer_Vision_Live_Emotion_Detection/blob/main/1.png)
