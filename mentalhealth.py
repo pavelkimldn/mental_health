@@ -6,7 +6,6 @@ Created on Wed Jul 31 22:07:54 2024
 @author: pavelkim
 """
 
-# Import necessary libraries
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,29 +18,21 @@ from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_curve, roc_auc_score, ConfusionMatrixDisplay
 
-# Load the dataset
 df = pd.read_csv('desktop/survey.csv')
 
-# Filter the dataset to include only 'Male' and 'Female' in the Gender column
 df = df[df['Gender'].isin(['Male', 'Female'])]
 
-# Display the first few rows of the dataframe
 print(df.head())
 
-# Summary statistics
 print(df.describe(include='all'))
 
-# Check for missing values
 missing_values = df.isnull().sum()
 print("Missing values in each column:\n", missing_values)
 
-# Fill missing values (if any) with forward fill method
 df.fillna(method='ffill', inplace=True)
 
-# Define Kooth brand colors
 kooth_colors = ['#004080', '#66CCFF', '#66FF99', '#CC66FF', '#FF66B2']
 
-# Distribution of Age
 plt.figure(figsize=(10, 6))
 sns.countplot(data=df, x='Age', palette=kooth_colors)
 plt.title('Age Distribution')
@@ -50,7 +41,6 @@ plt.ylabel('Frequency')
 plt.grid(True)
 plt.show()
 
-# Pie chart for Gender (with 'Other' category for small slices)
 gender_counts = df['Gender'].value_counts()
 large_gender_counts = gender_counts[gender_counts > 50]
 small_gender_counts = pd.Series(gender_counts[gender_counts <= 50].sum(), index=['Rest'])
@@ -62,7 +52,6 @@ plt.title('Gender Distribution')
 plt.ylabel('')
 plt.show()
 
-# Pie chart for Country (with 'Other' category for small slices)
 country_counts = df['Country'].value_counts()
 large_country_counts = country_counts[country_counts > 20]
 small_country_counts = pd.Series(country_counts[country_counts <= 20].sum(), index=['Rest'])
@@ -74,8 +63,6 @@ plt.title('Country Distribution')
 plt.ylabel('')
 plt.show()
 
-# Correlation heatmap
-# Convert categorical variables to numeric for correlation heatmap
 df_encoded = df.copy()
 for column in df_encoded.select_dtypes(include=['object']).columns:
     df_encoded[column] = df_encoded[column].astype('category').cat.codes
@@ -86,7 +73,6 @@ sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', linewidths=0.5)
 plt.title('Correlation Heatmap')
 plt.show()
 
-# Check for class imbalance in treatment
 treatment_counts = df['treatment'].value_counts()
 print("Class imbalance in 'treatment':\n", treatment_counts)
 
@@ -98,11 +84,9 @@ plt.ylabel('Count')
 plt.grid(True)
 plt.show()
 
-# Define features (X) and target (y)
 X = df.drop(columns=['treatment'])
 y = df['treatment'].apply(lambda x: 1 if x == 'Yes' else 0)
 
-# Preprocessing and model pipeline
 categorical_features = X.select_dtypes(include=['object']).columns.tolist()
 
 preprocessor = ColumnTransformer(
@@ -119,7 +103,6 @@ pipeline = Pipeline(steps=[
     ('classifier', DecisionTreeClassifier(random_state=42))
 ])
 
-# Define parameters for grid search
 param_grid = {
     'selector__k': [5, 10, 15, 'all'],
     'classifier__criterion': ['gini', 'entropy'],
@@ -128,30 +111,23 @@ param_grid = {
     'classifier__min_samples_leaf': [1, 2, 4]
 }
 
-# Perform grid search with cross-validation
 grid_search = GridSearchCV(estimator=pipeline, param_grid=param_grid, cv=5, scoring='accuracy')
 grid_search.fit(X, y)
 
-# Best model from grid search
 best_model = grid_search.best_estimator_
 print("Best Parameters: ", grid_search.best_params_)
 
-# Split the data into training and testing sets for final evaluation
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train the best model on the training set
 best_model.fit(X_train, y_train)
 
-# Predict and evaluate the model
 y_pred = best_model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(f'Model Accuracy: {accuracy}')
 
-# Print classification report and confusion matrix
 print("Classification Report:")
 print(classification_report(y_test, y_pred))
 
-# Confusion Matrix
 conf_matrix = confusion_matrix(y_test, y_pred)
 disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=['No Treatment', 'Treatment'])
 disp.plot(cmap='Blues')
@@ -159,7 +135,6 @@ plt.title('Confusion Matrix')
 plt.grid(False)
 plt.show()
 
-# ROC Curve and AUC
 y_prob = best_model.predict_proba(X_test)[:, 1]
 fpr, tpr, thresholds = roc_curve(y_test, y_prob)
 roc_auc = roc_auc_score(y_test, y_prob)
@@ -176,7 +151,6 @@ plt.legend(loc="lower right")
 plt.grid(True)
 plt.show()
 
-# Cross-validation scores
 cv_scores = cross_val_score(best_model, X, y, cv=5, scoring='accuracy')
 plt.figure(figsize=(10, 6))
 plt.plot(range(1, 6), cv_scores, marker='o', color=kooth_colors[1])
